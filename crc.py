@@ -1,3 +1,4 @@
+import binascii
 
 # CRC-16/CCITT-FALSE
 def crc16_ccitt_false(data : bytearray):
@@ -35,7 +36,6 @@ def crc16_buypass(data: bytes):
     return reg ^ xor_out
 
 # https://docs.python.org/3/library/binascii.html
-import binascii
 def crc16_xmodem(data: bytes):
   return binascii.crc_hqx(data, 0)
 
@@ -53,6 +53,4 @@ def crc16_modbus(data : bytearray):
             else:
                 crc = int(crc / 2)
     return crc & 0xFFFF
-
-
 

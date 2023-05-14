@@ -2,7 +2,7 @@ from itertools import cycle
 from pathlib import Path
 from sys import stderr
 
-from crctest import *
+from crc import *
 
 # Structure of pre-encoded payload
 # 8196 | 16      | ...  | 2   |
