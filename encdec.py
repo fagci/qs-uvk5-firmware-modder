@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from sys import argv
 
-from base import crctest, eprint, encrypt, decrypt
+from lib.base import crctest, eprint, encrypt, decrypt
 
 
 def usage(info = None):
