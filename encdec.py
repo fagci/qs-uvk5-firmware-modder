@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from sys import argv
 
-from lib.base import crctest, eprint, encrypt, decrypt
+from lib.base import eprint, encrypt, decrypt
 
 
 def usage(info = None):
@@ -23,10 +23,6 @@ def main():
     encdec = argv[1]
     fname = argv[2]
     file_bytes = Path(fname).read_bytes()
-    
-    if encdec == 'crc':
-        crctest(file_bytes)
-        return
 
     if encdec == 'd':
         decrypted = decrypt(file_bytes)
@@ -35,7 +31,6 @@ def main():
         return
 
     if encdec == 'e':
-        eprint('WARNING! encoding not working for now, as CRC not valid')
         encrypted = encrypt(file_bytes)
         os.write(1, bytes(encrypted))
         eprint('Success!')

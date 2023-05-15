@@ -17,12 +17,8 @@ def eprint(*args, **kwargs):
     print(*args, **kwargs, file=stderr)
 
 
-def xor(var, key):
-    return bytes(a ^ b for a, b in zip(var, cycle(key)))
-
-
-def eprint_crc(crc):
-    eprint('crc:', ['0x%02x' % x for x in crc], f'{crc[0]*crc[1]}')
+def xor(var):
+    return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
 
 
 def make_16byte_version(version):
@@ -30,39 +26,22 @@ def make_16byte_version(version):
 
 
 def decrypt(data):
-    decr = xor(data, KEY)
+    decr = xor(data)
     
     v = decr[V_OFFSET:V_OFFSET+V_LEN]
     decr_data = decr[:-CRC_LEN]
-    crc = decr[-CRC_LEN:]
 
     eprint('version:', v)
-    eprint_crc(crc)
 
     return decr_data
 
 
-def encrypt(data, version='2.01.19'):
+def encrypt(data, version='2.01.26'):
     v = make_16byte_version(version)
+    eprint('version:', v)
+
     data = data[:V_OFFSET] + v + data[V_OFFSET+V_LEN:]
-    crc = b'\xd9\xab' # here will be some crc
-    
-    eprint('version:', v)
-    eprint_crc(crc)
+    encoded = xor(data)
+    checksum = crc_hqx(encoded, 0).to_bytes(2, byteorder='little')
 
-    return xor(data + crc, KEY)
-
-def crctest(data):
-    decr = xor(data, KEY)
-    
-    v = decr[V_OFFSET:V_OFFSET+V_LEN]
-    decr_data = decr[:-CRC_LEN]
-
-    eprint('version:', v)
-
-    checksum = crc_hqx(data[:-CRC_LEN], 0)
-    file_checksum = int.from_bytes(data[-CRC_LEN:], byteorder='little')
-    print(f'Calculated checksum:', checksum)
-    print(f'File checksum:', file_checksum)
-
-    return decr_data
+    return encoded + checksum
