@@ -1,8 +1,7 @@
 from itertools import cycle
 from pathlib import Path
 from sys import stderr
-
-from lib.crc import *
+from binascii import crc_hqx
 
 # Structure of pre-encoded payload
 # 8196 | 16      | ...  | 2   |
@@ -13,7 +12,6 @@ KEY = Path('./key.bin').read_bytes()
 V_OFFSET = 8192
 V_LEN = 16
 CRC_LEN = 2
-
 
 def eprint(*args, **kwargs):
     print(*args, **kwargs, file=stderr)
@@ -66,18 +64,9 @@ def crctest(data):
     eprint_crc(crc_dec)
     eprint_crc(crc_enc)
 
-    crc1_test = crc_dec[0]*crc_dec[1]
-    crc2_test = crc_enc[0]*crc_enc[1]
-
-    for crc_f in [crc16_xmodem, crc16_buypass, crc16_ccitt_false, crc16_modbus]:
-        for d in [data[:-CRC_LEN], decr_data, decr_data[:V_OFFSET]+decr_data[V_OFFSET+V_LEN:-CRC_LEN], data[:V_OFFSET]+data[V_OFFSET+V_LEN:-CRC_LEN]]:
-            crc_try = crc_f(d)
-            eprint('try:', crc_try)
-            if crc_try == crc1_test:
-                eprint('BINGO: crc1_test', crc_try)
-                break
-            if crc_try == crc2_test:
-                eprint('BINGO: crc2_test', crc_try)
-                break
+    checksum = crc_hqx(data[:-CRC_LEN], 0)
+    file_checksum = int.from_bytes(crc_enc, byteorder='little')
+    print(f'Calculated checksum:', checksum)
+    print(f'File checksum:', file_checksum)
 
     return decr_data
