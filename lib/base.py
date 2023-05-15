@@ -57,15 +57,11 @@ def crctest(data):
     
     v = decr[V_OFFSET:V_OFFSET+V_LEN]
     decr_data = decr[:-CRC_LEN]
-    crc_dec = decr[-CRC_LEN:]
-    crc_enc = data[-CRC_LEN:]
 
     eprint('version:', v)
-    eprint_crc(crc_dec)
-    eprint_crc(crc_enc)
 
     checksum = crc_hqx(data[:-CRC_LEN], 0)
-    file_checksum = int.from_bytes(crc_enc, byteorder='little')
+    file_checksum = int.from_bytes(data[-CRC_LEN:], byteorder='little')
     print(f'Calculated checksum:', checksum)
     print(f'File checksum:', file_checksum)
 
