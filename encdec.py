@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from binascii import crc_hqx
+from binascii import crc_hqx as crc16
 from itertools import cycle
 import os
 from pathlib import Path
@@ -13,8 +13,8 @@ from sys import stderr
 
 KEY = Path('./key.bin').read_bytes()
 
-V_OFFSET = 8192
-V_LEN = 16
+V_START = 8192
+V_END = V_START + 16
 CRC_LEN = 2
 
 def eprint(*args, **kwargs):
@@ -27,13 +27,13 @@ def xor(var):
 
 def decrypt(data):
     decrypted = xor(data)
-    eprint('version:', decrypted[V_OFFSET:V_OFFSET+V_LEN].decode())
+    eprint('version:', decrypted[V_START:V_END].decode())
     return decrypted[:-CRC_LEN]
 
 
 def encrypt(data):
     encrypted = xor(data)
-    checksum = crc_hqx(encrypted, 0).to_bytes(2, byteorder='little')
+    checksum = crc16(encrypted, 0).to_bytes(2, 'little')
     return encrypted + checksum
 
 
