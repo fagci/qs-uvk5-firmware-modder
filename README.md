@@ -5,7 +5,7 @@ Supports updater v1.1.7 (decrypted only) and 1.1.11 (encrypted only).
 ## Usage
 
 ```
-./encdec.py <e|d> filename.bin > raw.bin
+./encdec.py <e|d> input.bin > output.bin
 ```
 
 Example decrypt:
