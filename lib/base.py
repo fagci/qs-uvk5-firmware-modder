@@ -26,22 +26,12 @@ def make_16byte_version(version):
 
 
 def decrypt(data):
-    decr = xor(data)
-    
-    v = decr[V_OFFSET:V_OFFSET+V_LEN]
-    decr_data = decr[:-CRC_LEN]
-
-    eprint('version:', v)
-
-    return decr_data
+    decrypted = xor(data)
+    eprint('version:', decrypted[V_OFFSET:V_OFFSET+V_LEN])
+    return decrypted[:-CRC_LEN]
 
 
-def encrypt(data, version='2.01.26'):
-    v = make_16byte_version(version)
-    eprint('version:', v)
-
-    data = data[:V_OFFSET] + v + data[V_OFFSET+V_LEN:]
-    encoded = xor(data)
-    checksum = crc_hqx(encoded, 0).to_bytes(2, byteorder='little')
-
-    return encoded + checksum
+def encrypt(data):
+    encrypted = xor(data)
+    checksum = crc_hqx(encrypted, 0).to_bytes(2, byteorder='little')
+    return encrypted + checksum
