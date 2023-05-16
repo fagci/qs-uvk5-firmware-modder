@@ -1,6 +1,6 @@
 # Quansheng UV-K5 firmware encoder/decoder
 
-Supports updater v1.1.7 (decrypted only) and 1.1.11 (encrypted only).
+Supports updater [v1.1.7](https://drive.google.com/file/d/1l7NiaImDJCEhKz6BdxD4UxNbs_u4J-cr/view?usp=share_link) (decrypted only) and [1.1.11+](https://drive.google.com/file/d/1hvjFoKGwMibhNqMi6X-rjFYcb6iIzUxe/view?usp=share_link) (encrypted only).
 
 ## Usage
 
