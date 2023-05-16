@@ -1,6 +1,6 @@
 # Quansheng UV-K5 firmware encoder/decoder
 
-Supports updater v1.1.7 (decrypted) and 1.1.11 (encrypted).
+Supports updater v1.1.7 (decrypted only) and 1.1.11 (encrypted only).
 
 ## Usage
 
@@ -8,13 +8,13 @@ Supports updater v1.1.7 (decrypted) and 1.1.11 (encrypted).
 ./encdec.py <e|d> filename.bin > raw.bin
 ```
 
-Example decode:
+Example decrypt:
 
 ```
 ./encdec.py d k5_26_encrypted.bin > k5_26_raw.bin
 ```
 
-Example encode:
+Example encrypt:
 
 ```
 ./encdec.py e k5_26_raw.bin > k5_26_encrypted.bin
