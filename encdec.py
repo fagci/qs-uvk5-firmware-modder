@@ -25,14 +25,19 @@ def xor(var):
     return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
 
 
+def make_16byte_version(version):
+    return bytes([ord(c) for c in version] + [0] * (16 - len(version)))
+
+
 def decrypt(data):
     decrypted = xor(data)
     eprint('version:', decrypted[V_START:V_END].decode())
-    return decrypted[:-CRC_LEN]
+    return decrypted[:V_START] + decrypted[V_END:-CRC_LEN]
 
 
-def encrypt(data):
-    encrypted = xor(data)
+def encrypt(data, version='2.01.26'):
+    v = make_16byte_version(version)
+    encrypted = xor(data[:V_START] + v + data[V_START:])
     checksum = crc16(encrypted, 0).to_bytes(2, 'little')
     return encrypted + checksum
 
