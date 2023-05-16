@@ -27,3 +27,7 @@ Example encrypt:
 [Windows software](https://drive.google.com/drive/folders/1rpQGXZpt3b9hQrC_2rx-hFjnlO8SdsRb?usp=sharing)
 
 [About Quansheng UV-K5 usage](https://mikhail-yudin.ru/notes/quansheng-uv-k5-opyt-raboty/) (Russian)
+
+## Results
+
+![](.img/photo_2023-05-15_23-30-39.jpg)
