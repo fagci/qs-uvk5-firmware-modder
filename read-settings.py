@@ -18,6 +18,38 @@ CMD_SETTINGS_REQ = 0x051B
 CMD_SETTINGS_RES = 0x051C
 
 
+def xor(var):
+    return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
+    
+
+def timestamp32():
+    return int(time()).to_bytes(4, 'little')
+
+
+def i2b16(cmd_id):
+    return cmd_id.to_bytes(2,'little')
+
+
+def b2i(data):
+    return int.from_bytes(data, 'little')
+
+
+def len16(data):
+    return i2b16(len(data))
+
+
+def crc16(data):
+    return i2b16(crc_hqx(data, 0))
+
+
+def cmd_make_req(cmd_id, body=b''):
+    data = body + timestamp32()
+    payload = i2b16(cmd_id) + len16(data) + data
+    encoded_payload = xor(payload + crc16(payload))
+
+    return PREAMBLE + len16(payload) + encoded_payload + POSTAMBLE
+
+
 def cmd_resp(cmd_id, data):
     # print('%x'%cmd_id)
     if cmd_id == CMD_VERSION_RES:
@@ -38,15 +70,15 @@ class UVK5(Serial):
 
 
     def cmd(self, id, body = b''):
-        self.write(UVK5.cmd_make_req(id, body))
+        self.write(cmd_make_req(id, body))
         preamble = self.read(2)
 
         if preamble != PREAMBLE:
             print('Bad response (PRE)')
             exit(128)
 
-        payload_len = int.from_bytes(self.read(2), 'little')
-        data = UVK5.xor(self.read(payload_len))
+        payload_len = b2i(self.read(2))
+        data = xor(self.read(payload_len))
 
         self.read(2)
         postamble = self.read(2)
@@ -56,43 +88,10 @@ class UVK5(Serial):
             exit(128)
             
         # print(data.hex())
-        cmd_id = int.from_bytes(data[:2], 'little')
-        data_len = int.from_bytes(data[2:4], 'little')
+        cmd_id = b2i(data[:2])
+        data_len = b2i(data[2:4])
 
         return (cmd_id, data[4:4+data_len])
-
-
-    @classmethod
-    def cmd_make_req(cls, cmd_id, body=b''):
-        data = body + UVK5.timestamp32()
-        payload = UVK5.cmd16(cmd_id) + UVK5.len16(data) + data
-        encoded_payload = UVK5.xor(payload + UVK5.crc16(payload))
-
-        return PREAMBLE + UVK5.len16(payload) + encoded_payload + POSTAMBLE
-
-    @classmethod
-    def crc16(cls, data):
-        return crc_hqx(data, 0).to_bytes(2,'little')
-
-
-    @classmethod
-    def len16(cls, data):
-        return int.to_bytes(len(data), 2, byteorder='little')
-
-
-    @classmethod
-    def xor(cls, var):
-        return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
-        
-
-    @classmethod
-    def timestamp32(cls):
-        return int(time()).to_bytes(4, 'little')
-
-
-    @classmethod
-    def cmd16(cls, cmd_id):
-        return cmd_id.to_bytes(2,'little')
 
 
 def main(port):
@@ -100,7 +99,7 @@ def main(port):
         resp_ver = s.cmd(CMD_VERSION_REQ)
         cmd_resp(*resp_ver)
 
-        resp_cfg = s.cmd(CMD_SETTINGS_REQ, 0x0F50.to_bytes(2, 'little') + 0x0C80.to_bytes(2, 'little'))
+        resp_cfg = s.cmd(CMD_SETTINGS_REQ, i2b16(0x0F50) + i2b16(0x0C80))
         cmd_resp(*resp_cfg)
         
 
