@@ -19,8 +19,10 @@ CMD_VERSION_RES = 0x0515
 CMD_SETTINGS_REQ = 0x051B
 CMD_SETTINGS_RES = 0x051C
 
-TIMESTAMP = int(time()).to_bytes(4, 'little')
+CMD_SETTINGS_WRITE_REQ = 0x051D # then addr (0x0E70) then size (0x0160) then data
 
+TIMESTAMP = int(time()).to_bytes(4, 'little')
+            
 
 def xor(var):
     return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
@@ -117,6 +119,8 @@ def main(port):
         ver = s.cmd(CMD_VERSION_REQ)[1][:10].decode().rstrip('\x00')
         print('FW version:', ver)
         read_channels_settings(s)
+        # data = s.read_mem(0x0E70, 0x80)[1]
+        # print('0x%x' % b2i(data[:2]), '0x%x' % b2i(data[2:4]), data[4:])
         
 
 if __name__ == '__main__':
