@@ -41,6 +41,10 @@ def len16(data):
 def crc16(data):
     return i2b16(crc_hqx(data, 0))
 
+def chunk(data, n):
+    for i in range(0,len(data), n):
+        yield data[i:i+n]
+
 
 def cmd_make_req(cmd_id, body=b''):
     data = body + TIMESTAMP
@@ -48,22 +52,6 @@ def cmd_make_req(cmd_id, body=b''):
     encoded_payload = xor(payload + crc16(payload))
 
     return PREAMBLE + len16(payload) + encoded_payload + POSTAMBLE
-
-
-def cmd_resp(cmd_id, data):
-    # print('%x'%cmd_id)
-    if cmd_id == CMD_VERSION_RES:
-        print('FW version:', data[:10].decode())
-        return
-
-    if cmd_id == CMD_SETTINGS_RES:
-        channels_offset = b2i(data[:2])
-        channels_size = b2i(data[2:4])
-        print(f'Channels({channels_offset}, {channels_size}):')
-        channel_names = data[4:]
-        for i in range(len(channel_names)//16):
-            print(channel_names[i*16:(i+1)*16].decode(errors='ignore'))
-        return
 
 
 class UVK5(Serial):
@@ -97,16 +85,38 @@ class UVK5(Serial):
         return (cmd_id, data)
 
 
+def read_channels_settings(s):
+    names = []
+    settings = []
+
+    data_size = 16 * 200
+    names_offset = 0x0F50
+    settings_offset = 0x0000
+
+    passes = data_size//BLOCK_SIZE
+
+    for block in range(passes):
+        offset = names_offset + block*BLOCK_SIZE
+        names_set = s.read_mem(offset, BLOCK_SIZE)[1][4:]
+        names += [name.decode(errors='ignore').rstrip('\x00') for name in chunk(names_set, 16)]
+
+    for block in range(passes):
+        offset = settings_offset + block*BLOCK_SIZE
+        settings_set = s.read_mem(offset, BLOCK_SIZE)[1][4:]
+        settings += [(b2i(setting[:4])/100000.0, ) for setting in chunk(settings_set, 16)]
+    
+    for i, name in enumerate(names):
+        if name:
+            print(f'{i+1:0>3}. {name: <16} {settings[i][0]:0<8} M')
+        else:
+            print(f'{i+1:0>3}. -')
+        
+
 def main(port):
     with UVK5(port) as s:
-        resp_ver = s.cmd(CMD_VERSION_REQ)
-        cmd_resp(*resp_ver)
-        size = 16*8
-        for i in range(int(0xc80/size)):
-            offset = 0x0F50 + i*size
-            print('0x%x 0x%x' % (offset, size))
-            resp_cfg = s.read_mem(offset, size)
-            cmd_resp(*resp_cfg)
+        ver = s.cmd(CMD_VERSION_REQ)[1][:10].decode().rstrip('\x00')
+        print('FW version:', ver)
+        read_channels_settings(s)
         
 
 if __name__ == '__main__':
