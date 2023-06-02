@@ -8,17 +8,29 @@ Supports updater [v1.1.7](https://drive.google.com/file/d/1l7NiaImDJCEhKz6BdxD4U
 ./encdec.py <e|d> input.bin > output.bin
 ```
 
-Example decrypt:
+### Example decrypt
 
 ```
 ./encdec.py d k5_26_encrypted.bin > k5_26_raw.bin
 ```
 
-Example encrypt:
+### Example encrypt
 
 ```
 ./encdec.py e k5_26_raw.bin > k5_26_encrypted.bin
 ```
+
+### Example freq bounds find
+
+```
+./freq-bounds-finder.py fw/k5_26_raw.bin
+
+0x1510: 60000000
+0xE08C: 47000000
+0xE0A8: 60000000
+```
+
+See [addressses in issue](https://github.com/Tunas1337/UV-K5-Modded-Firmwares/issues/8#issue-1737934912)
 
 ## Links
 
