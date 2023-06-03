@@ -8,6 +8,10 @@ Supports updater [v1.1.7](https://drive.google.com/file/d/1l7NiaImDJCEhKz6BdxD4U
 
 ### Example modding
 
+Supported versions see inside `addresses` directory.
+
+Values editable by versions inside `mods` directory. Take care about exact values, for ex `50 MHz` is `5_000_000`.
+
 ```
 ./modder.py fw/k5_26_encrypted.bin > fw/k5_26_encrypted_mod18to1300.bin
 ```
@@ -19,13 +23,13 @@ Supports updater [v1.1.7](https://drive.google.com/file/d/1l7NiaImDJCEhKz6BdxD4U
 ./encdec.py <e|d> input.bin > output.bin
 ```
 
-### Example decrypt
+Example decrypt
 
 ```
 ./encdec.py d k5_26_encrypted.bin > k5_26_raw.bin
 ```
 
-### Example encrypt
+Example encrypt
 
 ```
 ./encdec.py e k5_26_raw.bin > k5_26_encrypted.bin
