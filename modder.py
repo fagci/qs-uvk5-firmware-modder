@@ -37,8 +37,12 @@ def main(encrypted_file_path):
                 eprint('new:', new_value)
                 decrypted = decrypted[:addr] + int(new_value).to_bytes(4, 'little') + decrypted[addr+4:]
 
-
     encrypted = encrypt(decrypted, version)
+
+    if len(file_bytes) != len(encrypted):
+        eprint('Something goes wrong. Check values or open issue.')
+        exit(255)
+
     os.write(1, encrypted)
 
 
