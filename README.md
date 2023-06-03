@@ -1,8 +1,19 @@
 # Quansheng UV-K5 firmware encoder/decoder
 
+WARNING: I am not responsible for the consequences of using. Think before use twice or more. =)
+
 Supports updater [v1.1.7](https://drive.google.com/file/d/1l7NiaImDJCEhKz6BdxD4UxNbs_u4J-cr/view?usp=share_link) (decrypted only) and [1.1.11+](https://drive.google.com/file/d/1hvjFoKGwMibhNqMi6X-rjFYcb6iIzUxe/view?usp=share_link) (encrypted only).
 
 ## Usage
+
+### Example modding
+
+```
+./modder.py fw/k5_26_encrypted.bin > fw/k5_26_encrypted_mod18to1300.bin
+```
+
+### Encdec usage
+
 
 ```
 ./encdec.py <e|d> input.bin > output.bin
