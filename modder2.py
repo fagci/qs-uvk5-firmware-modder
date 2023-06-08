@@ -14,7 +14,7 @@ class Firmware:
         file_bytes = Path(encrypted_file_path).read_bytes()
         decrypted, version = decrypt(file_bytes)
         eprint('version:', version)
-        globals()['' %('Firmware', version.replace('.', '_'))](decrypted)
+        return globals()['%s_%s' %('Firmware', version.replace('.', '_'))](decrypted)
 
 
     def __init__(self, decrypted) -> None:
@@ -62,7 +62,7 @@ class Firmware_2_01_26(Firmware):
 
 
 def main(encrypted_file_path):
-    fw = Firmware(encrypted_file_path)
+    fw = Firmware.load(encrypted_file_path)
     fw.patch({
         'bands': {
             2: [1800000, None],
