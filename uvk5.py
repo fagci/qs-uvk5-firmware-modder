@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 
 from binascii import crc_hqx
-from itertools import cycle
-from pathlib import Path
 from sys import argv
 from time import time
 
 from serial import Serial
 
-from lib.encdec import eprint
-
-DATA_DIR = Path(__file__).parent / 'data'
-KEY = (DATA_DIR / 'comm-key.bin').read_bytes()
+from lib.encdec import eprint, xor_comm
 
 BLOCK_SIZE = 0x80
 
@@ -27,10 +22,6 @@ CMD_SETTINGS_RES = 0x051C
 CMD_SETTINGS_WRITE_REQ = 0x051D # then addr (0x0E70) then size (0x0160) then data
 
 TIMESTAMP = int(time()).to_bytes(4, 'little')
-            
-
-def xor(var):
-    return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
     
 
 def i2b16(cmd_id):
@@ -56,7 +47,7 @@ def chunk(data, n):
 def cmd_make_req(cmd_id, body=b''):
     data = body + TIMESTAMP
     payload = i2b16(cmd_id) + len16(data) + data
-    encoded_payload = xor(payload + crc16(payload))
+    encoded_payload = xor_comm(payload + crc16(payload))
 
     return PREAMBLE + len16(payload) + encoded_payload + POSTAMBLE
 
@@ -79,7 +70,7 @@ class UVK5(Serial):
             raise ValueError('Bad response (PRE)')
 
         payload_len = b2i(self.read(2)) + 2 # CRC len
-        payload = xor(self.read(payload_len))
+        payload = xor_comm(self.read(payload_len))
 
         # crc = payload[-2:]
         postamble = self.read(2)
@@ -95,7 +86,7 @@ class UVK5(Serial):
         return (cmd_id, data)
 
 
-    def read_channels_settings(self):
+    def channels(self):
         names = []
         settings = []
 
@@ -125,7 +116,7 @@ class UVK5(Serial):
 def main(port, cmd, args):
     with UVK5(port) as s:
         print('FW version:', s.get_version())
-        s.read_channels_settings()
+        getattr(s, cmd)(*args)
         # data = s.read_mem(0x0E70, 0x80)[1]
         # print('0x%x' % b2i(data[:2]), '0x%x' % b2i(data[2:4]), data[4:])
         

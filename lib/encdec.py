@@ -10,6 +10,7 @@ from pathlib import Path
 LIB_DIR = Path(__file__).parent
 DATA_DIR = LIB_DIR / '..' / 'data'
 KEY = (DATA_DIR / 'key.bin').read_bytes()
+COMM_KEY = (DATA_DIR / 'key.bin').read_bytes()
 
 V_START = 8192
 V_END = V_START + 16
@@ -21,6 +22,10 @@ def eprint(*args, **kwargs):
 
 def xor(var):
     return bytes(a ^ b for a, b in zip(var, cycle(KEY)))
+
+
+def xor_comm(var):
+    return bytes(a ^ b for a, b in zip(var, cycle(COMM_KEY)))
 
 
 def make_16byte_version(version):
