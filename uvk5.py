@@ -119,9 +119,6 @@ class UVK5(Serial):
 
         return (cmd_id, data)
 
-    def version(self):
-        self.get_version()
-
     def channels(self):
         names = []
         settings = []
@@ -171,6 +168,10 @@ if __name__ == '__main__':
     args = argv[3:]
 
     with UVK5(port) as s:
-        s.get_version()
+        version = s.get_version()
+        if cmd == 'version':
+            print('FW Version:', version)
+            exit(0)
+
         print(getattr(s, cmd)(*args))
 

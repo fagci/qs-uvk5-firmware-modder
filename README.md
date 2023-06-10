@@ -16,6 +16,21 @@ Values editable by versions inside `mods` directory. Take care about exact value
 ./modder.py fw/k5_26_encrypted.bin > fw/k5_26_encrypted_mod18to1300.bin
 ```
 
+### Example UV-K5 programming tool
+
+Common usage:
+
+```
+python3 uvk5.py <port> <command> [args]
+```
+
+Specific usage:
+
+```
+python3 uvk5.py com3 version
+python3 uvk5.py com3 channels
+```
+
 ### Encdec usage
 
 
