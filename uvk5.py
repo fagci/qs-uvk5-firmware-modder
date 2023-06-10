@@ -2,12 +2,17 @@
 
 from binascii import crc_hqx
 from itertools import cycle
+from pathlib import Path
 from sys import argv
 from time import time
 
 from serial import Serial
 
-KEY = bytes.fromhex('166c14e62e910d402135d5401303e980')
+from lib.encdec import eprint
+
+DATA_DIR = Path(__file__).parent / 'data'
+KEY = (DATA_DIR / 'comm-key.bin').read_bytes()
+
 BLOCK_SIZE = 0x80
 
 PREAMBLE = b'\xab\xcd'
@@ -60,6 +65,9 @@ class UVK5(Serial):
     def __init__(self, port: str | None = None) -> None:
         super().__init__(port, 38400, timeout=5)
 
+    def get_version(self):
+        return self.cmd(CMD_VERSION_REQ)[1][:10].decode().rstrip('\x00')
+
     def read_mem(self, offset, size):
         return self.cmd(CMD_SETTINGS_REQ, i2b16(offset) + i2b16(size))
 
@@ -87,41 +95,43 @@ class UVK5(Serial):
         return (cmd_id, data)
 
 
-def read_channels_settings(s):
-    names = []
-    settings = []
+    def read_channels_settings(self):
+        names = []
+        settings = []
 
-    data_size = 16 * 200
-    names_offset = 0x0F50
-    settings_offset = 0x0000
+        data_size = 16 * 200
+        names_offset = 0x0F50
+        settings_offset = 0x0000
 
-    passes = data_size//BLOCK_SIZE
+        passes = data_size//BLOCK_SIZE
 
-    for block in range(passes):
-        offset = names_offset + block*BLOCK_SIZE
-        names_set = s.read_mem(offset, BLOCK_SIZE)[1][4:]
-        names += [name.decode(errors='ignore').rstrip('\x00') for name in chunk(names_set, 16)]
+        for block in range(passes):
+            offset = names_offset + block*BLOCK_SIZE
+            names_set = self.read_mem(offset, BLOCK_SIZE)[1][4:]
+            names += [name.decode(errors='ignore').rstrip('\x00') for name in chunk(names_set, 16)]
 
-    for block in range(passes):
-        offset = settings_offset + block*BLOCK_SIZE
-        settings_set = s.read_mem(offset, BLOCK_SIZE)[1][4:]
-        settings += [(b2i(setting[:4])/100000.0, ) for setting in chunk(settings_set, 16)]
-    
-    for i, name in enumerate(names):
-        if name:
-            print(f'{i+1:0>3}. {name: <16} {settings[i][0]:0<8} M')
-        else:
-            print(f'{i+1:0>3}. -')
+        for block in range(passes):
+            offset = settings_offset + block*BLOCK_SIZE
+            settings_set = self.read_mem(offset, BLOCK_SIZE)[1][4:]
+            settings += [(b2i(setting[:4])/100000.0, ) for setting in chunk(settings_set, 16)]
+        
+        for i, name in enumerate(names):
+            if name:
+                print(f'{i+1:0>3}. {name: <16} {settings[i][0]:0<8} M')
+            else:
+                print(f'{i+1:0>3}. -')
         
 
-def main(port):
+def main(port, cmd, args):
     with UVK5(port) as s:
-        ver = s.cmd(CMD_VERSION_REQ)[1][:10].decode().rstrip('\x00')
-        print('FW version:', ver)
-        read_channels_settings(s)
+        print('FW version:', s.get_version())
+        s.read_channels_settings()
         # data = s.read_mem(0x0E70, 0x80)[1]
         # print('0x%x' % b2i(data[:2]), '0x%x' % b2i(data[2:4]), data[4:])
         
 
 if __name__ == '__main__':
-    main(argv[1])
+    if len(argv) < 3:
+        eprint(f'Usage: {argv[0]} <port> <command> [args]')
+        exit(255)
+    main(argv[1], argv[2], argv[3:])
