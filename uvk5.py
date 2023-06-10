@@ -28,7 +28,7 @@ def eprint(*args, **kwargs):
     print(*args, **kwargs, file=stderr)
 
 
-def xor(var):
+def xor_fw(var):
     return bytes(a ^ b for a, b in zip(var, cycle(KEY_FW)))
 
 
@@ -61,14 +61,14 @@ def crc16(data):
 
 
 def decrypt(data):
-    decrypted = xor(data)
+    decrypted = xor_fw(data)
     version = decrypted[V_START:V_END].decode().rstrip('\x00')
     return (decrypted[:V_START] + decrypted[V_END:-CRC_LEN], version)
 
 
 def encrypt(data, version='2.01.26'):
     v = make_16byte_version(version)
-    encrypted = xor(data[:V_START] + v + data[V_START:])
+    encrypted = xor_fw(data[:V_START] + v + data[V_START:])
     checksum = crc16(encrypted)
     return encrypted + checksum
 
