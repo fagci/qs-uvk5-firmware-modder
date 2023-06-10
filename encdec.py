@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from sys import argv
 
-from lib.encdec import eprint, encrypt, decrypt
+from lib.uvk5 import eprint, encrypt, decrypt
 
 
 def usage(info = None):

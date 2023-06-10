@@ -5,7 +5,7 @@ from pathlib import Path
 from sys import argv
 from configparser import ConfigParser
 
-from lib.encdec import decrypt, encrypt, eprint
+from uvk5 import decrypt, encrypt, eprint
 
 ADDR_DIR = Path(__file__).parent / 'addresses'
 MODS_DIR = Path(__file__).parent / 'mods'
