@@ -67,7 +67,7 @@ class UVK5(Serial):
         preamble = self.read(2)
 
         if preamble != PREAMBLE:
-            raise ValueError('Bad response (PRE)')
+            raise ValueError('Bad response (PRE)', preamble)
 
         payload_len = b2i(self.read(2)) + 2 # CRC len
         payload = xor_comm(self.read(payload_len))
@@ -117,9 +117,7 @@ def main(port, cmd, args):
     with UVK5(port) as s:
         print('FW version:', s.get_version())
         getattr(s, cmd)(*args)
-        # data = s.read_mem(0x0E70, 0x80)[1]
-        # print('0x%x' % b2i(data[:2]), '0x%x' % b2i(data[2:4]), data[4:])
-        
+
 
 if __name__ == '__main__':
     if len(argv) < 3:
