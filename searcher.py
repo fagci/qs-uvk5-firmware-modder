@@ -7,13 +7,13 @@ V_START = 8192
 
 def main():
     if len(argv) != 3:
-        print(f'Usage: {argv[0]} <search_string> decrypted_file.bin')
+        print(f'Usage: {argv[0]} decrypted_file.bin <search_string>')
         exit(128)
 
-    search_for = argv[1].encode()
-    data = Path(argv[2]).read_bytes()
+    data = Path(argv[1]).read_bytes()
+    search_for = argv[2].encode()
 
-    if data[V_START:V_START+4] != b'2.01':
+    if data[:4] != b'\x88\x13\x00\x20':
         print('Encrypted file, choose decrypted.')
         exit(200)
 
