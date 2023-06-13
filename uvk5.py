@@ -105,14 +105,19 @@ class Firmware(bytearray):
 
 
     def patch_single(self, addr, new_value, size=4):
-        old_bytes = self.decrypted[addr:addr+size]
+        old_bytes = self[addr:addr+size]
         old_value = int.from_bytes(old_bytes, 'little')
         new_bytes = int(new_value).to_bytes(size, 'little')
-        self.decrypted = self.decrypted[:addr] + new_bytes + self.decrypted[addr+size:]
+        self[addr:addr+size] = new_bytes
+
+
+    def apply_mods(self, names):
+        eprint('Not implemented for', self.version)
+        exit(128)
 
 
     def write(self, path=None):
-        encrypted = encrypt(self.decrypted, self.version)
+        encrypted = encrypt(self, self.version)
 
         if path:
             pass
@@ -121,7 +126,31 @@ class Firmware(bytearray):
 
 
 class Firmware_2_01_26(Firmware):
-    pass
+    ADR_BANDS = [
+        [0xE074, 0xE090],
+        [0xE078, 0xE094],
+        [0xE07C, 0xE098],
+        [0xE080, 0xE09C],
+        [0xE084, 0xE0A0],
+        [0xE088, 0xE0A4],
+        [0xE08C, 0xE0A8],
+    ]
+    ADR_LIMITS = [0x150C, 0x1510]
+    ADR_TX_CHECK = 0x180E
+
+    def mod_unlimit_rx(self):
+        self.patch_single(self.ADR_BANDS[0][0], 18_000_000//10)
+        self.patch_single(self.ADR_BANDS[6][1], 1_300_000_000//10)
+        self.patch_single(self.ADR_LIMITS[0], 18_000_000//10)
+        self.patch_single(self.ADR_LIMITS[1], 1_300_000_000//10)
+
+    def mod_unlimit_tx(self):
+        self.patch_single(self.ADR_TX_CHECK, b'\x5d\xe0', 2)
+
+
+    def apply_mods(self, mod_names):
+        for mod in mod_names:
+            getattr(self, f'mod_{mod}')()
 
 
 class UVK5(Serial):
