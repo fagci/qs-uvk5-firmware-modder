@@ -2,6 +2,7 @@
 
 from binascii import crc_hqx
 from itertools import cycle
+import os
 from sys import stderr, argv
 from pathlib import Path
 from time import time
@@ -60,6 +61,20 @@ def crc16(data):
     return i2b16(crc_hqx(data, 0))
 
 
+def is_decrypted(data):
+    return data[:4] == b'\x88\x13\x00\x20' or data[:4] == b'\x88\x11\x00\x20'
+
+
+def search_for_version(data):
+    pre = bytes.fromhex('2135D5401303E980')
+    plen = len(pre)
+    for i in range(len(data)-plen):
+        if data[i:i+plen] == pre:
+            return data[i+plen:i+plen+16].decode(errors='ignore').rstrip('\x00').split('_')[1]
+    return 'unknown'
+
+
+
 def decrypt(data):
     decrypted = xor_fw(data)
     version = decrypted[V_START:V_END].decode().rstrip('\x00')
@@ -71,6 +86,42 @@ def encrypt(data, version='2.01.26'):
     encrypted = xor_fw(data[:V_START] + v + data[V_START:])
     checksum = crc16(encrypted)
     return encrypted + checksum
+
+
+class Firmware(bytearray):
+    @classmethod
+    def load(cls, path):
+        data = Path(path).read_bytes()
+        if is_decrypted(data):
+            version = search_for_version(data)
+        else:
+            data, version = decrypt(data)
+
+        return globals().get(f'Firmware_{version.replace(".", "_")}', cls)(data, version)
+
+    def __init__(self, data, version) -> None:
+        super().__init__(data)
+        self.version = version
+
+
+    def patch_single(self, addr, new_value, size=4):
+        old_bytes = self.decrypted[addr:addr+size]
+        old_value = int.from_bytes(old_bytes, 'little')
+        new_bytes = int(new_value).to_bytes(size, 'little')
+        self.decrypted = self.decrypted[:addr] + new_bytes + self.decrypted[addr+size:]
+
+
+    def write(self, path=None):
+        encrypted = encrypt(self.decrypted, self.version)
+
+        if path:
+            pass
+        else:
+            os.write(1, encrypted)
+
+
+class Firmware_2_01_26(Firmware):
+    pass
 
 
 class UVK5(Serial):
