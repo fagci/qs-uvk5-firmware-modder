@@ -144,11 +144,6 @@ class Firmware(bytearray):
         self[addr:addr+size] = new_bytes
 
 
-    def apply_mods(self, names):
-        eprint('Not implemented for', self.version)
-        exit(128)
-
-
     def write(self, path=None):
         encrypted = encrypt(self, self.version)
 
@@ -158,7 +153,40 @@ class Firmware(bytearray):
             os.write(1, encrypted)
 
 
-class Firmware_2_01_26(Firmware):
+class FirmwareModifiable(Firmware):
+    def apply_mods(self, mod_names):
+        for mod in mod_names:
+            getattr(self, f'mod_{mod}')()
+
+    def get_available_mods(self):
+        for func in dir(self):
+            if callable(getattr(self, func)) and func.startswith('mod_'):
+                yield func[4:]
+
+    def mod_unlimit_rx(self):
+        self.patch_single(self.ADR_BANDS[0][0], 18_000_000//10)
+        self.patch_single(self.ADR_BANDS[6][1], 1_300_000_000//10)
+        self.patch_single(self.ADR_LIMITS[0], 18_000_000//10)
+        self.patch_single(self.ADR_LIMITS[1], 1_300_000_000//10)
+
+    def mod_unlimit_tx(self):
+        self.patch_single(self.ADR_TX_CHECK, b'\x5d\xe0', 2)
+
+
+class Firmware_2_01_17(FirmwareModifiable):
+    ADR_BANDS = [
+        [0xEAE4,0xEB00],
+        [0xEAE8,0xEB04],
+        [0xEAEC,0xEB08],
+        [0xEAF0,0xEB0C],
+        [0xEAF4,0xEB10],
+        [0xEAF8,0xEB14],
+        [0xEAFC,0xEB18],
+    ]
+    ADR_LIMITS = [0x1AF0, 0x1AF4]
+
+
+class Firmware_2_01_26(FirmwareModifiable):
     ADR_BANDS = [
         [0xE074, 0xE090],
         [0xE078, 0xE094],
@@ -171,19 +199,6 @@ class Firmware_2_01_26(Firmware):
     ADR_LIMITS = [0x150C, 0x1510]
     ADR_TX_CHECK = 0x180E
 
-    def mod_unlimit_rx(self):
-        self.patch_single(self.ADR_BANDS[0][0], 18_000_000//10)
-        self.patch_single(self.ADR_BANDS[6][1], 1_300_000_000//10)
-        self.patch_single(self.ADR_LIMITS[0], 18_000_000//10)
-        self.patch_single(self.ADR_LIMITS[1], 1_300_000_000//10)
-
-    def mod_unlimit_tx(self):
-        self.patch_single(self.ADR_TX_CHECK, b'\x5d\xe0', 2)
-
-
-    def apply_mods(self, mod_names):
-        for mod in mod_names:
-            getattr(self, f'mod_{mod}')()
 
 
 class UVK5(Serial):

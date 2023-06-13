@@ -12,6 +12,9 @@ def main(cmd):
         return
 
     if cmd == 'mod':
+        if argc == 3:
+            print('Mods:', ','.join(list(fw.get_available_mods())))
+            return
         eprint('mods:', argv[3])
         fw.apply_mods(argv[3].split(','))
         fw.write()
