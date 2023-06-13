@@ -124,7 +124,16 @@ class Firmware(bytearray):
 
 
         for addr, ch in changes.items():
-            print(addr, ch[0].hex(), ch[1].hex())
+            print(f'{addr}:', ch[0].hex(), ch[1].hex())
+
+
+    def search(self, q):
+
+        search_for_len = len(q)
+
+        for i in range(len(self)):
+            if self[i:i+search_for_len] == q:
+                print(f'[{i}]: {self[i:i+32]}')
 
 
 

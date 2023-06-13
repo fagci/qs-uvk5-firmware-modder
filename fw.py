@@ -19,13 +19,22 @@ def main(cmd):
             with UVK5(argv[4]) as uvk5:
                 uvk5.get_version()
                 uvk5.send_firmware(fw)
-        return
 
     if cmd == 'cmp':
         fw2 = Firmware.load(argv[3])
         fw.compare(fw2)
 
+    if cmd == 'search':
+        fw.search(argv[3].encode())
+
+
+def usage():
+    eprint('Usage:', argv[0], '<cmd>', '<fw.bin>', '[args...]')
+    exit(255)
 
 
 if __name__ == '__main__':
+    if len(argv) == 1:
+        usage()
+
     main(argv[1])
