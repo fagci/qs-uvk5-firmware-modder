@@ -104,6 +104,30 @@ class Firmware(bytearray):
         self.version = version
 
 
+    def compare(self, fw):
+        a = None
+        la = len(self)
+        lb = len(fw)
+        changes = {}
+        for i in range(min(la, lb)):
+            differ = self[i] != fw[i]
+            if not differ:
+                a = None
+                continue
+
+            if not a:
+                a = '0x%x' % i
+                changes[a] = [bytearray(), bytearray()]
+
+            changes[a][0].append(self[i])
+            changes[a][1].append(fw[i])
+
+
+        for addr, ch in changes.items():
+            print(addr, ch[0].hex(), ch[1].hex())
+
+
+
     def patch_single(self, addr, new_value, size=4):
         old_bytes = self[addr:addr+size]
         old_value = int.from_bytes(old_bytes, 'little')
