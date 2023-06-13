@@ -153,6 +153,13 @@ class Firmware(bytearray):
             os.write(1, encrypted)
 
 
+    def write_raw(self, path=None):
+        if path:
+            pass
+        else:
+            os.write(1, self)
+
+
 class FirmwareModifiable(Firmware):
     def apply_mods(self, mod_names):
         for mod in mod_names:

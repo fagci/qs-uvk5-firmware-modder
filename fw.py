@@ -27,6 +27,12 @@ def main(cmd):
         fw2 = Firmware.load(argv[3])
         fw.compare(fw2)
 
+    if cmd == 'enc':
+        fw.write()
+
+    if cmd == 'dec':
+        fw.write_raw()
+
     if cmd == 'search':
         fw.search(argv[3].encode())
 
