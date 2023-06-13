@@ -35,19 +35,19 @@ python3 uvk5.py com3 channels
 
 
 ```
-./encdec.py <e|d> input.bin > output.bin
+./fw.py <enc|dec> input.bin > output.bin
 ```
 
 Example decrypt
 
 ```
-./encdec.py d k5_26_encrypted.bin > k5_26_raw.bin
+./fw.py dec k5_26_encrypted.bin > k5_26_raw.bin
 ```
 
 Example encrypt
 
 ```
-./encdec.py e k5_26_raw.bin > k5_26_encrypted.bin
+./fw.py enc k5_26_raw.bin > k5_26_encrypted.bin
 ```
 
 ## Links
