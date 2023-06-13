@@ -170,6 +170,15 @@ class UVK5(Serial):
         self.timestamp = i2b32(time())
         super().__init__(port, 38400, timeout=5)
 
+    def send_firmware(self, fw:Firmware):
+        for block, data in enumerate(chunk(fw, UVK5.BLOCK_SIZE)):
+            offset = block * UVK5.BLOCK_SIZE
+            self.write_fw(offset, data)
+        exit(128)
+
+    def write_fw(self, offset, data):
+        eprint('FW write not implemented yet', offset, len(data))
+
     def get_version(self):
         return self.cmd(UVK5.CMD_VERSION_REQ)[1][:10].decode().rstrip('\x00')
 
