@@ -62,6 +62,14 @@ Example encrypt
 
 @sq5bpf for [k5prog](https://github.com/sq5bpf/k5prog)
 
+### Discussion
+
+[Telegram Channel - EN](https://t.me/quansheng_uvk5_en)
+
+[Telegram Channel - RU](https://t.me/uv_k5)
+
+[Telegram Channel - ES](https://t.me/QuanShengES)
+
 ### Information
 
 [Firmware versions](https://drive.google.com/drive/folders/1GXWjiW0geMiAnVxWpm5rf6OUlXT43ZzB?usp=share_link)
