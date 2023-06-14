@@ -54,13 +54,13 @@ Example encrypt
 
 Special thanks to:
 
-[Mods kitchen, tools by amnemonic](https://github.com/amnemonic/Quansheng_UV-K5_Firmware/tree/main)
+@amnemonic [Mods kitchen, tools](https://github.com/amnemonic/Quansheng_UV-K5_Firmware/tree/main)
 
-[Modded firmwares by Tunas1337](https://github.com/Tunas1337/UV-K5-Modded-Firmwares)
+@Tunas1337 [Modded firmwares by](https://github.com/Tunas1337/UV-K5-Modded-Firmwares)
 
-[uvk5 reverse engineering by sq5bpf](https://github.com/sq5bpf/uvk5-reverse-engineering)
+@sq5bpf [uvk5 reverse engineering by](https://github.com/sq5bpf/uvk5-reverse-engineering)
 
-[k5prog by sq5bpf](https://github.com/sq5bpf/k5prog)
+@sq5bpf [k5prog](https://github.com/sq5bpf/k5prog)
 
 Information:
 
