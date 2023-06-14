@@ -52,6 +52,18 @@ Example encrypt
 
 ## Links
 
+Special thanks to:
+
+[Mods kitchen, tools by amnemonic](https://github.com/amnemonic/Quansheng_UV-K5_Firmware/tree/main)
+
+[Modded firmwares by Tunas1337](https://github.com/Tunas1337/UV-K5-Modded-Firmwares)
+
+[uvk5 reverse engineering by sq5bpf](https://github.com/sq5bpf/uvk5-reverse-engineering)
+
+[k5prog by sq5bpf](https://github.com/sq5bpf/k5prog)
+
+Information:
+
 [Firmware versions](https://drive.google.com/drive/folders/1GXWjiW0geMiAnVxWpm5rf6OUlXT43ZzB?usp=share_link)
 
 [Windows software](https://drive.google.com/drive/folders/1rpQGXZpt3b9hQrC_2rx-hFjnlO8SdsRb?usp=sharing)
