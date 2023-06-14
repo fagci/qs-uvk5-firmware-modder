@@ -52,7 +52,7 @@ Example encrypt
 
 ## Links
 
-Special thanks to:
+### Special thanks to
 
 @amnemonic for [Mods kitchen, tools](https://github.com/amnemonic/Quansheng_UV-K5_Firmware/tree/main)
 
@@ -62,7 +62,7 @@ Special thanks to:
 
 @sq5bpf for [k5prog](https://github.com/sq5bpf/k5prog)
 
-Information:
+### Information
 
 [Firmware versions](https://drive.google.com/drive/folders/1GXWjiW0geMiAnVxWpm5rf6OUlXT43ZzB?usp=share_link)
 
