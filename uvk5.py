@@ -3,6 +3,7 @@
 from binascii import crc_hqx
 from itertools import cycle
 import os
+import struct
 from sys import stderr, argv
 from pathlib import Path
 from time import time
@@ -238,7 +239,19 @@ class UVK5(Serial):
         return self.cmd(UVK5.CMD_VERSION_REQ)[1][:10].decode().rstrip('\x00')
 
     def read_mem(self, offset, size):
-        return self.cmd(UVK5.CMD_SETTINGS_REQ, i2b16(offset) + i2b16(size))
+        return self.cmd(UVK5.CMD_SETTINGS_REQ, i2b32(offset) + i2b16(size))
+
+    def write_patch(self):
+        from patch import PATCH
+        print(len(PATCH))
+        def divide_chunks(l, n): 
+            for i in range(0, len(l), n):  
+                yield l[i:i + n]
+        offset = 0
+        for chunk in divide_chunks(PATCH,8):
+            print(f"Write at {offset}...")
+            self.cmdw(0x061D, offset, bytes(chunk))
+            offset += len(chunk)
 
     def cmd(self, id, body = b''):
         self.write(self._cmd_make_req(id, body))
@@ -254,7 +267,30 @@ class UVK5(Serial):
         postamble = self.read(2)
         
         if postamble != UVK5.POSTAMBLE:
-            raise ValueError('Bad response (POST)')
+            raise ValueError('Bad response (POST)', postamble, payload, payload_len)
+            
+        # print(data.hex())
+        cmd_id = b2i(payload[:2])
+        data_len = b2i(payload[2:4])
+        data = payload[4:4+data_len]
+
+        return (cmd_id, data)
+
+    def cmdw(self, id, address,payload):
+        self.write(self._cmd_make_reqw(id, address, payload))
+        preamble = self.read(2)
+
+        if preamble != UVK5.PREAMBLE:
+            raise ValueError('Bad response (PRE)', preamble)
+
+        payload_len = b2i(self.read(2)) + 2 # CRC len
+        payload = xor_comm(self.read(payload_len))
+
+        # crc = payload[-2:]
+        postamble = self.read(2)
+        
+        if postamble != UVK5.POSTAMBLE:
+            raise ValueError('Bad response (POST)', postamble, payload, payload_len)
             
         # print(data.hex())
         cmd_id = b2i(payload[:2])
@@ -293,6 +329,11 @@ class UVK5(Serial):
 
         return out.getvalue()
 
+    def read_eeprom(self, offset, size):
+        size = int(size) if size else UVK5.BLOCK_SIZE
+        data = self.read_mem(offset, size)
+        print(data[1])
+
 
     def _cmd_make_req(self, cmd_id, body=b''):
         data = body + self.timestamp
@@ -300,6 +341,13 @@ class UVK5(Serial):
         encoded_payload = xor_comm(payload + crc16(payload))
 
         return UVK5.PREAMBLE + len16(payload) + encoded_payload + UVK5.POSTAMBLE
+
+    def _cmd_make_reqw(self, cmd_id, address, payload):
+        payload = i2b16(cmd_id) + struct.pack('<HHH',len(payload)+8, address, len(payload)) + self.timestamp + payload
+        encoded_payload = xor_comm(payload + crc16(payload))
+
+        return UVK5.PREAMBLE + len16(payload) + encoded_payload + UVK5.POSTAMBLE
+        
 
 
 if __name__ == '__main__':
@@ -310,6 +358,9 @@ if __name__ == '__main__':
     port = argv[1]
     cmd = argv[2]
     args = argv[3:]
+    for i in range(len(args)):
+        if args[i][:2] == '0x':
+            args[i] = int(args[i][2:], 16)
 
     with UVK5(port) as s:
         version = s.get_version()
@@ -317,5 +368,7 @@ if __name__ == '__main__':
             print('FW Version:', version)
             exit(0)
 
-        print(getattr(s, cmd)(*args))
+        res = getattr(s, cmd)(*args)
+        if res:
+            print(res)
 
